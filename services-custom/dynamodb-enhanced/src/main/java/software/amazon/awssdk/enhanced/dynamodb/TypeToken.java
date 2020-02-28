@@ -60,6 +60,7 @@ public class TypeToken<T> {
     private final boolean isWildcard;
     private final Class<T> rawClass;
     private final List<TypeToken<?>> rawClassParameters;
+    private final TableSchema<T> tableSchema;
 
     /**
      * Create a type token, capturing the generic type arguments of the token as {@link Class}es.
@@ -82,18 +83,21 @@ public class TypeToken<T> {
             this.isWildcard = true;
             this.rawClass = null;
             this.rawClassParameters = null;
+            this.tableSchema = null;
         } else {
             this.isWildcard = false;
             this.rawClass = validateAndConvert(type);
             this.rawClassParameters = loadTypeParameters(type);
+            this.tableSchema = null;
         }
     }
 
-    private TypeToken(Class<?> rawClass, List<TypeToken<?>> rawClassParameters) {
+    private TypeToken(Class<?> rawClass, List<TypeToken<?>> rawClassParameters, TableSchema<T> tableSchema) {
         // This is only used internally, so we can make sure this cast is safe via testing.
         this.rawClass = (Class<T>) rawClass;
-        this.rawClassParameters = rawClassParameters;
         this.isWildcard = false;
+        this.rawClassParameters = rawClassParameters;
+        this.tableSchema = tableSchema;
     }
 
     /**
@@ -109,6 +113,15 @@ public class TypeToken<T> {
         return new TypeToken<>(type);
     }
 
+    /**
+     * Create a type token for the provided non-parameterized class.
+     *
+     * <p>
+     * Reasons this call may fail with a {@link RuntimeException}:
+     * <ol>
+     *     <li>If the provided type is null.</li>
+     * </ol>
+     */
     public static TypeToken<?> of(Type type) {
         return new TypeToken<>(type);
     }
@@ -149,7 +162,7 @@ public class TypeToken<T> {
      * </ol>
      */
     public static <T> TypeToken<List<T>> listOf(TypeToken<T> valueType) {
-        return new TypeToken<>(List.class, Arrays.asList(valueType));
+        return new TypeToken<>(List.class, Arrays.asList(valueType), null);
     }
 
     /**
@@ -175,20 +188,7 @@ public class TypeToken<T> {
      * </ol>
      */
     public static <T> TypeToken<Set<T>> setOf(TypeToken<T> valueType) {
-        return new TypeToken<>(Set.class, Arrays.asList(valueType));
-    }
-
-    /**
-     * Create a type token for a sorted set, with the provided value type class.
-     *
-     * <p>
-     * Reasons this call may fail with a {@link RuntimeException}:
-     * <ol>
-     *     <li>If the provided type is null.</li>
-     * </ol>
-     */
-    public static <T> TypeToken<SortedSet<T>> sortedSetOf(Class<T> valueType) {
-        return new TypeToken<>(DefaultParameterizedType.parameterizedType(SortedSet.class, valueType));
+        return new TypeToken<>(Set.class, Arrays.asList(valueType), null);
     }
 
     /**
@@ -201,33 +201,7 @@ public class TypeToken<T> {
      * </ol>
      */
     public static <T> TypeToken<SortedSet<T>> sortedSetOf(TypeToken<T> valueType) {
-        return new TypeToken<>(SortedSet.class, Arrays.asList(valueType));
-    }
-
-    /**
-     * Create a type token for a queue, with the provided value type class.
-     *
-     * <p>
-     * Reasons this call may fail with a {@link RuntimeException}:
-     * <ol>
-     *     <li>If the provided type is null.</li>
-     * </ol>
-     */
-    public static <T> TypeToken<Queue<T>> queueOf(Class<T> valueType) {
-        return new TypeToken<>(DefaultParameterizedType.parameterizedType(Queue.class, valueType));
-    }
-
-    /**
-     * Create a type token for a queue, with the provided value type token.
-     *
-     * <p>
-     * Reasons this call may fail with a {@link RuntimeException}:
-     * <ol>
-     *     <li>If the provided type is null.</li>
-     * </ol>
-     */
-    public static <T> TypeToken<Queue<T>> queueOf(TypeToken<T> valueType) {
-        return new TypeToken<>(Queue.class, Arrays.asList(valueType));
+        return new TypeToken<>(SortedSet.class, Arrays.asList(valueType), null);
     }
 
     /**
@@ -253,7 +227,7 @@ public class TypeToken<T> {
      * </ol>
      */
     public static <T> TypeToken<Deque<T>> dequeOf(TypeToken<T> valueType) {
-        return new TypeToken<>(Deque.class, Arrays.asList(valueType));
+        return new TypeToken<>(Deque.class, Arrays.asList(valueType), null);
     }
 
     /**
@@ -279,7 +253,7 @@ public class TypeToken<T> {
      * </ol>
      */
     public static <T> TypeToken<NavigableSet<T>> navigableSetOf(TypeToken<T> valueType) {
-        return new TypeToken<>(NavigableSet.class, Arrays.asList(valueType));
+        return new TypeToken<>(NavigableSet.class, Arrays.asList(valueType), null);
     }
 
     /**
@@ -305,7 +279,7 @@ public class TypeToken<T> {
      * </ol>
      */
     public static <T> TypeToken<Collection<T>> collectionOf(TypeToken<T> valueType) {
-        return new TypeToken<>(Collection.class, Arrays.asList(valueType));
+        return new TypeToken<>(Collection.class, Arrays.asList(valueType), null);
     }
 
     /**
@@ -331,7 +305,7 @@ public class TypeToken<T> {
      * </ol>
      */
     public static <T, U> TypeToken<Map<T, U>> mapOf(TypeToken<T> keyType, TypeToken<U> valueType) {
-        return new TypeToken<>(Map.class, Arrays.asList(keyType, valueType));
+        return new TypeToken<>(Map.class, Arrays.asList(keyType, valueType), null);
     }
 
     /**
@@ -357,7 +331,7 @@ public class TypeToken<T> {
      * </ol>
      */
     public static <T, U> TypeToken<SortedMap<T, U>> sortedMapOf(TypeToken<T> keyType, TypeToken<U> valueType) {
-        return new TypeToken<>(SortedMap.class, Arrays.asList(keyType, valueType));
+        return new TypeToken<>(SortedMap.class, Arrays.asList(keyType, valueType), null);
     }
 
     /**
@@ -383,7 +357,7 @@ public class TypeToken<T> {
      * </ol>
      */
     public static <T, U> TypeToken<ConcurrentMap<T, U>> concurrentMapOf(TypeToken<T> keyType, TypeToken<U> valueType) {
-        return new TypeToken<>(ConcurrentMap.class, Arrays.asList(keyType, valueType));
+        return new TypeToken<>(ConcurrentMap.class, Arrays.asList(keyType, valueType), null);
     }
 
     /**
@@ -409,7 +383,18 @@ public class TypeToken<T> {
      * </ol>
      */
     public static <T, U> TypeToken<NavigableMap<T, U>> navigableMapOf(TypeToken<T> keyType, TypeToken<U> valueType) {
-        return new TypeToken<>(NavigableMap.class, Arrays.asList(keyType, valueType));
+        return new TypeToken<>(NavigableMap.class, Arrays.asList(keyType, valueType), null);
+    }
+
+    /**
+     * Create a type token that represents a document that is specified by the provided {@link TableSchema}.
+     *
+     * @param documentClass The Class representing the modeled document.
+     * @param documentTableSchema A TableSchema that describes the properties of the document.
+     * @return a new TypeToken representing the provided document.
+     */
+    public static <T> TypeToken<T> documentOf(Class<T> documentClass, TableSchema<T> documentTableSchema) {
+        return new TypeToken<>(documentClass, null, documentTableSchema);
     }
 
     private static Type validateIsSupportedType(Type type) {
@@ -429,6 +414,9 @@ public class TypeToken<T> {
         return type;
     }
 
+    /**
+     * Returns whether or not the type this TypeToken was created with is a wildcard type.
+     */
     public boolean isWildcard() {
         return isWildcard;
     }
@@ -444,6 +432,14 @@ public class TypeToken<T> {
     }
 
     /**
+     * Retrieve the {@link TableSchema} for a modeled document. This is used for
+     * converting nested documents within a schema.
+     */
+    public Optional<TableSchema<T>> tableSchema() {
+        return Optional.ofNullable(tableSchema);
+    }
+
+    /**
      * Retrieve the {@link Class} objects of any type parameters for the class that this type token represents.
      *
      * <p>
@@ -456,33 +452,6 @@ public class TypeToken<T> {
     public List<TypeToken<?>> rawClassParameters() {
         Validate.isTrue(!isWildcard, "A wildcard type is not expected here.");
         return rawClassParameters;
-    }
-
-    public boolean isSuperTypeOf(TypeToken<?> rhs) {
-        // Covariant or contravariant wildcard types aren't supported, so if we're a wildcard then we're a supertype.
-        if (isWildcard) {
-            return true;
-        }
-
-        // If they aren't assignable to us, then we're obviously not a subtype.
-        if (!rawClass.isAssignableFrom(rhs.rawClass)) {
-            return false;
-        }
-
-        // Now things are tricky - if they are definitely a subtype of us,
-        if (rawClass.equals(rhs.rawClass)) {
-            if (rawClassParameters.size() != rhs.rawClassParameters.size()) {
-                return false;
-            }
-
-            for (int i = 0; i < rawClassParameters.size(); i++) {
-                if (!rawClassParameters.get(i).isSuperTypeOf(rhs.rawClassParameters.get(i))) {
-                    return false;
-                }
-            }
-        }
-
-        return true;
     }
 
     private Type captureGenericTypeArguments() {
@@ -521,31 +490,6 @@ public class TypeToken<T> {
                   .collect(toList()));
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (!(o instanceof TypeToken)) {
-            return false;
-        }
-        TypeToken<?> typeToken = (TypeToken<?>) o;
-        return rawClass.equals(typeToken.rawClass) &&
-            rawClassParameters.equals(typeToken.rawClassParameters);
-    }
-
-    @Override
-    public int hashCode() {
-        int result = rawClass.hashCode();
-        result = 31 * result + rawClassParameters.hashCode();
-        return result;
-    }
-
-    @Override
-    public String toString() {
-        return "TypeToken(" + innerToString() + ")";
-    }
-
     private StringBuilder innerToString() {
         StringBuilder result = new StringBuilder();
         result.append(rawClass.getTypeName());
@@ -557,5 +501,44 @@ public class TypeToken<T> {
         }
 
         return result;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof TypeToken)) {
+            return false;
+        }
+
+        TypeToken<?> typeToken = (TypeToken<?>) o;
+
+        if (isWildcard != typeToken.isWildcard) {
+            return false;
+        }
+        if (!rawClass.equals(typeToken.rawClass)) {
+            return false;
+        }
+        if (rawClassParameters != null ? !rawClassParameters.equals(typeToken.rawClassParameters) :
+            typeToken.rawClassParameters != null) {
+            return false;
+        }
+
+        return tableSchema != null ? tableSchema.equals(typeToken.tableSchema) : typeToken.tableSchema == null;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = (isWildcard ? 1 : 0);
+        result = 31 * result + rawClass.hashCode();
+        result = 31 * result + (rawClassParameters != null ? rawClassParameters.hashCode() : 0);
+        result = 31 * result + (tableSchema != null ? tableSchema.hashCode() : 0);
+        return result;
+    }
+
+    @Override
+    public String toString() {
+        return "TypeToken(" + innerToString() + ")";
     }
 }

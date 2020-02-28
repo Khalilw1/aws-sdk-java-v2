@@ -24,7 +24,6 @@ import static software.amazon.awssdk.enhanced.dynamodb.AttributeValues.stringVal
 
 import java.util.HashMap;
 import java.util.Map;
-
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;

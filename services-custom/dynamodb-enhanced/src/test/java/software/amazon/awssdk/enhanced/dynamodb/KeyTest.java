@@ -22,7 +22,6 @@ import static software.amazon.awssdk.enhanced.dynamodb.AttributeValues.stringVal
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-
 import org.junit.Test;
 import software.amazon.awssdk.enhanced.dynamodb.functionaltests.models.FakeItemWithIndices;
 import software.amazon.awssdk.services.dynamodb.model.AttributeValue;

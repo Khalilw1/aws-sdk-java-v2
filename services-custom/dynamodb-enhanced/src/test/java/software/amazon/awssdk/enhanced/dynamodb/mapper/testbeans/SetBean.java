@@ -15,10 +15,9 @@
 
 package software.amazon.awssdk.enhanced.dynamodb.mapper.testbeans;
 
-import java.nio.ByteBuffer;
 import java.util.Objects;
 import java.util.Set;
-
+import software.amazon.awssdk.core.SdkBytes;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbBean;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbPartitionKey;
 
@@ -32,7 +31,7 @@ public class SetBean {
     private Set<Byte> byteSet;
     private Set<Double> doubleSet;
     private Set<Float> floatSet;
-    private Set<ByteBuffer> byteBufferSet;
+    private Set<SdkBytes> binarySet;
 
     @DynamoDbPartitionKey
     public String getId() {
@@ -97,12 +96,12 @@ public class SetBean {
         this.floatSet = floatSet;
     }
 
-    public Set<ByteBuffer> getByteBufferSet() {
-        return byteBufferSet;
+    public Set<SdkBytes> getBinarySet() {
+        return binarySet;
     }
 
-    public void setByteBufferSet(Set<ByteBuffer> byteBufferSet) {
-        this.byteBufferSet = byteBufferSet;
+    public void setBinarySet(Set<SdkBytes> binarySet) {
+        this.binarySet = binarySet;
     }
 
     @Override
@@ -118,11 +117,11 @@ public class SetBean {
             Objects.equals(byteSet, setBean.byteSet) &&
             Objects.equals(doubleSet, setBean.doubleSet) &&
             Objects.equals(floatSet, setBean.floatSet) &&
-            Objects.equals(byteBufferSet, setBean.byteBufferSet);
+            Objects.equals(binarySet, setBean.binarySet);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, stringSet, integerSet, longSet, shortSet, byteSet, doubleSet, floatSet, byteBufferSet);
+        return Objects.hash(id, stringSet, integerSet, longSet, shortSet, byteSet, doubleSet, floatSet, binarySet);
     }
 }

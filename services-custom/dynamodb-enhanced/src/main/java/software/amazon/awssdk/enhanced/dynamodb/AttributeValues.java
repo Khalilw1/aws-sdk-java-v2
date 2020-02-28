@@ -15,10 +15,9 @@
 
 package software.amazon.awssdk.enhanced.dynamodb;
 
-import java.nio.ByteBuffer;
-
 import software.amazon.awssdk.annotations.SdkPublicApi;
-import software.amazon.awssdk.enhanced.dynamodb.mapper.AttributeTypes;
+import software.amazon.awssdk.core.SdkBytes;
+import software.amazon.awssdk.enhanced.dynamodb.internal.converter.attribute.EnhancedAttributeValue;
 import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
 
 /**
@@ -49,7 +48,7 @@ public final class AttributeValues {
      * @return An {@link AttributeValue} of type S that represents the string literal.
      */
     public static AttributeValue stringValue(String value) {
-        return AttributeTypes.stringType().objectToAttributeValue(value);
+        return EnhancedAttributeValue.fromString(value).toAttributeValue();
     }
 
     /**
@@ -58,16 +57,16 @@ public final class AttributeValues {
      * @return An {@link AttributeValue} of type n that represents the numeric literal.
      */
     public static AttributeValue numberValue(Number value) {
-        return AttributeTypes.numberType(null).objectToAttributeValue(value);
+        return EnhancedAttributeValue.fromNumber(value.toString()).toAttributeValue();
     }
 
     /**
-     * Creates a literal binary {@link AttributeValue} from a Java {@link ByteBuffer}.
-     * @param value A {@link ByteBuffer} to create the literal from.
+     * Creates a literal binary {@link AttributeValue} from raw bytes.
+     * @param value bytes to create the literal from.
      * @return An {@link AttributeValue} of type B that represents the binary literal.
      */
-    public static AttributeValue binaryValue(ByteBuffer value) {
-        return AttributeTypes.binaryType().objectToAttributeValue(value);
+    public static AttributeValue binaryValue(SdkBytes value) {
+        return EnhancedAttributeValue.fromBytes(value).toAttributeValue();
     }
 
     /**

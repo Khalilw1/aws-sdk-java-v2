@@ -23,7 +23,6 @@ import static software.amazon.awssdk.enhanced.dynamodb.AttributeValues.stringVal
 import static software.amazon.awssdk.enhanced.dynamodb.functionaltests.models.FakeItem.createUniqueFakeItem;
 
 import java.util.Map;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;

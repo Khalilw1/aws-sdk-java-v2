@@ -20,7 +20,6 @@ import static org.hamcrest.Matchers.is;
 import static software.amazon.awssdk.enhanced.dynamodb.AttributeValues.stringValue;
 
 import java.util.Optional;
-
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
